@@ -1,7 +1,7 @@
 <script setup>
+import SideBar from "../components/SideBar.vue";
 import { ref } from "vue";
 
-const arrowDirection = ref("right");
 const data = ref([
   {
     text: "好喝黑糖",
@@ -18,7 +18,7 @@ const data = ref([
       },
       {
         text: "黑糖冬瓜",
-        value: "445",
+        value: "29e",
         children: [
           { text: "黑糖冬瓜牛奶", value: "ac3", children: [] },
           { text: "黑糖冬瓜珍珠", value: "ca0", children: [] },
@@ -93,59 +93,32 @@ const data = ref([
   },
 ]);
 
-function turn() {
-  return (arrowDirection.value = arrowDirection.value === "right" ? "bottom" : "right");
+const selectOptions = ref(flattenTree(data.value));
+const selectValue = ref("-");
+
+function flattenTree(tree, parentValue = "") {
+  let result = [];
+
+  for (let node of tree) {
+    let value = parentValue + (parentValue ? ";" : "") + node.value;
+    result.push({ text: node.text, value: value });
+
+    if (node.children && node.children.length > 0) {
+      let children = flattenTree(node.children, value);
+      result = result.concat(children);
+    }
+  }
+
+  return result;
 }
 </script>
 
 <template>
-  <ul v-for="root in data">
-    <li>
-      <a href="#" @click="turn"
-        >{{ root.text }}
-        <i :class="arrowDirection" class="arrow"></i>
-      </a>
-      <ul>
-        <li v-for="second in root.children">
-          <a href="#" @click="turn"
-            >{{ second.text }}
-            <i :class="arrowDirection" class="arrow"></i>
-          </a>
-          <ul>
-            <li v-for="third in second.children">
-              <a href="#" @click="turn"
-                >{{ third.text }}
-                <i :class="arrowDirection" class="arrow"></i>
-              </a>
-              <ul>
-                <li v-for="four in third.children">
-                  <a href="#" @click="turn"
-                    >{{ four.text }}
-                    <i :class="arrowDirection" class="arrow"></i>
-                  </a>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-  </ul>
+  <SideBar :data="data" :selected="selectValue"></SideBar>
+  <select v-model="selectValue">
+    <option>-</option>
+    <option v-for="item in selectOptions" :value="item.value">{{ item.text }}</option>
+  </select>
 </template>
 
-<style scoped>
-.arrow {
-  border: solid black;
-  border-width: 0px 3px 3px 0;
-  display: inline-block;
-  padding: 3px;
-}
-
-.right {
-  transform: rotate(-45deg);
-}
-
-.bottom {
-  transform: rotate(45deg);
-}
-</style>
+<style scoped></style>
