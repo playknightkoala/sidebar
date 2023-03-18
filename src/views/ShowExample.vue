@@ -1,7 +1,9 @@
 <script setup>
 import SideBar from "../components/SideBar.vue";
-import { ref } from "vue";
+import { useStore } from "vuex";
+import { onMounted, ref } from "vue";
 
+const store = useStore();
 const data = ref([
   {
     text: "好喝黑糖",
@@ -92,9 +94,15 @@ const data = ref([
     ],
   },
 ]);
-
 const selectOptions = ref(flattenTree(data.value));
 const selectValue = ref("-");
+
+store.commit("setHistorySelect", selectOptions.value);
+
+onMounted(() => {
+  const historySelect = localStorage.getItem("historySelect");
+  selectValue.value = historySelect;
+});
 
 function flattenTree(tree, parentValue = "") {
   let result = [];

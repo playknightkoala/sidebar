@@ -19,10 +19,15 @@ export default {
   setup() {
     const store = useStore();
     const isToggle = computed(() => store.state.isToggle);
+    const historySelect = computed(() => store.state.historySelect);
 
     return {
       isToggle,
+      historySelect,
     };
+  },
+  components: {
+    SideBar: this,
   },
   props: {
     data: Array,
@@ -35,14 +40,8 @@ export default {
     };
   },
   watch: {
-    selected(newValue, oldValue) {
-      this.data.forEach((item) => {
-        if (newValue.indexOf(item.value) >= 0) {
-          if (!this.open[item.value]) {
-            this.toggle(item);
-          }
-        }
-      });
+    selected(newValue) {
+      this.directSelectItem(newValue);
     },
   },
   methods: {
@@ -51,8 +50,10 @@ export default {
     },
     toggle(item) {
       if (item.value === this.isToggle) {
+        localStorage.setItem("historySelect", "");
         this.$store.commit("setIsToggle", "");
       } else {
+        localStorage.setItem("historySelect", this.processHistorySelect(item.text));
         this.$store.commit("setIsToggle", item.value);
       }
       if (item.children) {
@@ -64,9 +65,22 @@ export default {
         this.open[item.value] = !this.isOpen(item);
       }
     },
-  },
-  components: {
-    SideBar: this,
+    directSelectItem(selectItem) {
+      this.data.forEach((item) => {
+        if (selectItem.indexOf(item.value) >= 0) {
+          if (!this.open[item.value]) {
+            this.toggle(item);
+          }
+        }
+      });
+    },
+    processHistorySelect(text) {
+      const select = this.historySelect.filter((item) => item.text === text);
+      if (select.length > 0) {
+        return select[0].value;
+      }
+      return "";
+    },
   },
 };
 </script>
