@@ -1,9 +1,10 @@
 <script setup>
 import SideBar from "../components/SideBar.vue";
-import { useStore } from "vuex";
-import { onMounted, ref } from "vue";
+import {useStore} from "vuex";
+import {onMounted, ref} from "vue";
 
 const store = useStore();
+// 項目資料
 const data = ref([
   {
     text: "好喝黑糖",
@@ -94,16 +95,29 @@ const data = ref([
     ],
   },
 ]);
-const selectOptions = ref(flattenTree(data.value));
-const selectValue = ref("-");
 
+// 選單選項
+const selectOptions = ref(flattenTree(data.value));
+// 選到的選項
+const selectValue = ref("-");
+// 將選項存入Vuex的setHistorySelect
 store.commit("setHistorySelect", selectOptions.value);
 
 onMounted(() => {
-  const historySelect = localStorage.getItem("historySelect");
-  selectValue.value = historySelect;
+  // 如果有歷史選擇紀錄則將記錄設定為選單選到的選項
+  if (localStorage.getItem("historySelect")) {
+    selectValue.value = localStorage.getItem("historySelect");
+  }
 });
 
+/**
+ * 使用遞迴的方式解開傳進來的參數將參數平面化
+ * value的部分則會依照層數疊加，並使用";"分隔
+ * EX: { text: "黑糖鮮奶", value: "64f;445"}
+ * @param tree 要被展開的參數
+ * @param parentValue 要被疊加的參數
+ * @returns Object
+ */
 function flattenTree(tree, parentValue = "") {
   let result = [];
 
